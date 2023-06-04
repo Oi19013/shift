@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カレンダー</title>
+  <link rel="stylesheet" href="calendar.css">
+  <script src="shift.js"></script>
+</head>
+<body>
+  <header>
+    <h1>ヘッダー</h1>
+  </header>
+
+  <main>
+    <div class="wrapper">
+      <!-- xxxx年xx月を表示 -->
+      <h1 id="header"></h1>
+    
+      <!-- ボタンクリックで月移動 -->
+      <div id="next-prev-button">
+          <button id="prev" onclick="prev()">‹</button>
+          <button id="next" onclick="next()">›</button>
+      </div>
+    
+      <!-- カレンダー -->
+      <div id="calendar"></div>
+    </div>
+  </main>
+
+  <footer>
+    <p>フッター</p>
+  </footer>
+</body>
+</html>
