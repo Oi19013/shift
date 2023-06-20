@@ -22,22 +22,34 @@ table {
     outline: 2px solid #ddd;
     border-collapse: collapse;
     width: 100%;
+    table-layout: fixed;
 }
 th {
     color: #000;
 }
-th, td {
+th {
     outline: 1px solid #ddd;
     padding-top: 10px;
     padding-bottom: 10px;
+    table-layout: fixed;
     text-align: center;
 }
+td {
+    outline: 1px solid #ddd;
+    padding-top: 10px;
+    /* padding-bottom: 100px; */
+    height: 100px;
+    width: 50px;
+    table-layout: fixed;
+    text-align: center;
+    vertical-align: top;
+}
 /*日曜日*/
-td:first-child {
+th:first-child {
     color: red;
 }
 /*土曜日*/
-td:last-child {
+th:last-child {
     color: blue;
 }
 /*前後月の日付*/
@@ -46,7 +58,7 @@ td.disabled {
 }
 /*本日*/
 td.today {
-    background-color: #D65E72;
+    background-color: #d2f1ff;
     color: #fff;
 }
 
@@ -73,4 +85,74 @@ td.today {
 }
 #next {
     float: right;
+}
+#shiftOpen{
+    cursor: pointer;
+    background: #5f9bf5;
+    color: #fff;
+    border-radius: 100%;
+    font-size: 1rem;
+    /* padding: 0.5rem 2rem;
+    margin: 1rem 0; */
+}
+
+/* シフト編集画面 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #f4f4f4;
+    margin: 20% auto;
+    width: 50%;
+    box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2),0 7px 20px 0 rgba(0,0,0,0.17);
+    animation-name: modalopen;
+    animation-duration: 1s;
+}
+
+@keyframes modalopen {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+.modal-header h1 {
+    margin: 1rem 0;
+}
+
+.modal-header {
+    background: lightblue;
+    padding: 3px 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.modalClose {
+    font-size: 2rem;
+}
+
+.modalClose:hover {
+    cursor: pointer;
+}
+
+.modal-body {
+    font-size: 20pt;
+    padding: 10px 25px;
+    color: black;
+}
+
+.form-select{
+    font-size: 15pt;
+}
+
+.form{
+    width: 250pt;
+    height: 45pt;
 }

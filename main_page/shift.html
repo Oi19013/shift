@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>カレンダー</title>
   <link rel="stylesheet" href="calendar.css">
-  <script src="shift.js"></script>
 </head>
 <body>
   <header>
@@ -25,7 +24,35 @@
     
       <!-- カレンダー -->
       <div id="calendar"></div>
+      <div id="shiftModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 id="shiftDate"></h1>
+            <span class="modalClose">×</span>
+          </div>
+          <div class="modal-body">
+            <select id="shiftTime" class="form-select" aria-label="select example">
+              <option selected>出勤時間</option>
+              <option value="15:00~">15:00</option>
+              <option value="15:30~">15:30</option>
+              <option value="16:00~">16:00</option>
+              <option value="16:30~">16:30</option>
+              <option value="17:00~">17:00</option>
+              <option value="17:30~">17:30</option>
+              <option value="18:00~">18:00</option>
+            </select>
+            <div class="mb-3">
+              <br><label for="exampleFormControlTextarea1" class="form-label">備考</label></br>
+              <textarea class="form" id="exampleFormControlTextarea1" placeholder="22時あがり，あおい大好き♡など" rows="3"></textarea>
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary" onclick="submit()">提出</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    <script src="shift.js"></script>
   </main>
 
   <footer>
