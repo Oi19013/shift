@@ -137,3 +137,4 @@ dmypy.json
 # ds_file
 ~/Desktop/M1/
 .DS_Store
+node_modules/
