@@ -1,29 +1,28 @@
 const { render } = require('ejs');
 const express = require('express');
 const mysql = require('mysql');
-const path = require('path');
-const login = express();
+const app = express();
 
-login.use(express.static('public'))
-login.set('views',  'views')
-login.set('view engine', 'ejs')
+app.use(express.static('public'))
+app.set('views',  'views')
+app.set('view engine', 'ejs')
 
-login.get('/', (req, res) => {
+app.get('/', (req, res) => {
     res.render('menu.ejs');
 });
-login.get('/reg.ejs', (req, res) => {
+app.get('/reg.ejs', (req, res) => {
     res.render('reg.ejs');
 });
-login.get('/auth.ejs', (req, res) => {
+app.get('/auth.ejs', (req, res) => {
     res.render('auth.ejs');
 });
-login.get('/main.ejs', (req, res) => {
+app.get('/main.ejs', (req, res) => {
     res.render('main.ejs');
 });
-login.listen(3000);
+app.listen(3000);
 
 let flg_reg = false;
-login.post('/reg', (req, res) => {
+app.post('/reg', (req, res) => {
     let data = '';
     req.on('data', function(chunk) {
         data += chunk;
@@ -41,7 +40,7 @@ login.post('/reg', (req, res) => {
 });
 
 let flg_auth = false;
-login.post('/auth', (req, res) => {
+app.post('/auth', (req, res) => {
     let data = '';
     req.on('data', function(chunk) {
         data += chunk;
@@ -92,7 +91,6 @@ function auth (param) {
     const pass = param[1].split('=')[1];
 
     const connection = mysql.createConnection({
-        host: 'localhost',
         user: 'root',
         password: '',
     });
