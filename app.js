@@ -2,6 +2,7 @@ const { render } = require('ejs');
 const express = require('express');
 const mysql = require('mysql');
 const app = express();
+const today = new Date();
 
 app.use(express.static('public'))
 app.set('views',  'views')
@@ -19,7 +20,31 @@ app.get('/auth.ejs', (req, res) => {
 app.get('/main.ejs', (req, res) => {
     res.render('main.ejs');
 });
+app.get('/api/getCalender', async(req, res) => {
+    try{
+        console.log(req['month'])
+        const getCalenders = await getShift(req.month);
+    } catch (err){
+        console.log(err)
+    }
+});
+app.post('/api/addCalender', async(req, res) => {
+    try{
+        const addCalenders = await calender.create(req.body);
+    } catch (err){
+        console.log(err)
+    }
+});
 app.listen(3000);
+
+// もしなければ次の月のtableを作成
+const connection = mysql.createConnection({
+    user: 'root',
+    password: '',
+    database: 'shift',
+});
+connection.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth()+1} SELECT * from user;`);
+connection.end();
 
 let flg_reg = false;
 app.post('/reg', (req, res) => {
@@ -48,7 +73,7 @@ app.post('/auth', (req, res) => {
         auth(data.split('&'));
         setTimeout(function () {
             if (flg_auth) {
-                res.render('main.ejs');
+                res.redirect('main.ejs');
             } else {
                 res.redirect('auth.ejs?msg=IDまたはパスワードが正しくありません');
             }
@@ -110,4 +135,23 @@ function auth (param) {
     connection.end();
     flg_auth = true;
     return;
+}
+
+// データ取得
+function getShift (param) {
+    const connection = mysql.createConnection({
+        user: 'root',
+        password: '',
+    });
+    connection.query('USE shift');
+    connection.query(
+        'SELECT * FROM "' +
+        param +
+        '";',
+        (err, result) => {
+            console.log(err)
+            console.log(result)
+    });
+    connection.end();
+    return result;
 }
