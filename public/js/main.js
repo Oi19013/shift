@@ -68,9 +68,11 @@ function submit() {
 const getCalenderFromdb = async (date) => {
     try {
         let calendarFromdb = await axios.get('/api/getCalender', {
-            month: `${date.getFullYear()}_${date.getMonth()}`
+            params: {
+                month: `${date.getFullYear()}_${date.getMonth()}`
+            }
         });
-        console.log(calendarFromdb)
+        // console.log(calendarFromdb)
     } catch (err) {
         console.log(err);
     }

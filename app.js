@@ -22,8 +22,8 @@ app.get('/main.ejs', (req, res) => {
 });
 app.get('/api/getCalender', async(req, res) => {
     try{
-        console.log(req['month'])
-        const getCalenders = await getShift(req.month);
+        console.log(req.query.month)
+        const getCalenders = await getShift(req.query.month);
     } catch (err){
         console.log(err)
     }
@@ -38,12 +38,17 @@ app.post('/api/addCalender', async(req, res) => {
 app.listen(3000);
 
 // もしなければ次の月のtableを作成
+const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
 const connection = mysql.createConnection({
     user: 'root',
     password: '',
     database: 'shift',
 });
-connection.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth()+1} SELECT * from user;`);
+connection.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth()+1} SELECT name from user;`);
+for (let i = 1; i > endDate; i += 1){
+    connection.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+1} ADD ${i}_ varchar(5);`)
+    console.log(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+1} ADD ${i}_ varchar(5);`)
+}
 connection.end();
 
 let flg_reg = false;
@@ -145,13 +150,13 @@ function getShift (param) {
     });
     connection.query('USE shift');
     connection.query(
-        'SELECT * FROM "' +
+        'SELECT * FROM ' +
         param +
-        '";',
+        ';',
         (err, result) => {
             console.log(err)
             console.log(result)
     });
     connection.end();
-    return result;
+    return;
 }
