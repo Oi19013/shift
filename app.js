@@ -39,17 +39,21 @@ app.listen(3000);
 
 // もしなければ次の月のtableを作成
 const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
     user: 'root',
     password: '',
     database: 'shift',
 });
-connection.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth()+1} SELECT name from user;`);
-for (let i = 1; i > endDate; i += 1){
-    connection.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+1} ADD ${i}_ varchar(5);`)
-    console.log(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+1} ADD ${i}_ varchar(5);`)
+pool.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth()+2} SELECT name from user;`);
+// 日毎のカラム作成
+for (let i = 1; i <= endDate; i += 1){
+    pool.query(
+        `DESCRIBE ${today.getFullYear()}_${today.getMonth()+2} ${i}_;`,
+        (error, results) => {
+            if (results.length == 0) pool.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+2} ADD ${i}_ varchar(5);`);
+        }
+    )
 }
-connection.end();
 
 let flg_reg = false;
 app.post('/reg', (req, res) => {
@@ -155,7 +159,7 @@ function getShift (param) {
         ';',
         (err, result) => {
             console.log(err)
-            console.log(result)
+            // console.log(result)
     });
     connection.end();
     return;

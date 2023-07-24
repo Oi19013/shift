@@ -72,7 +72,7 @@ const getCalenderFromdb = async (date) => {
                 'month': `${date.getFullYear()}_${date.getMonth()}`
             }
         });
-        console.log(calendarFromdb)
+        // console.log(calendarFromdb)
     } catch (err) {
         console.log(err);
     }
