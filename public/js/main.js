@@ -65,19 +65,20 @@ function submit() {
 }
 
 // dbから取得
-const getCalenderFromdb = async (date) => {
+const getCalendarFromdb = async (date) => {
     try {
-        let calendarFromdb = await axios.get('/api/getCalender', {
+        let calendarFromdb = await axios.get('/api/getCalendar', {
             params: {
                 'month': `${date.getFullYear()}_${date.getMonth()}`
             }
         });
-        // console.log(calendarFromdb)
+        console.log(calendarFromdb.data)
+        return calendarFromdb.data
     } catch (err) {
         console.log(err);
     }
 };
-getCalenderFromdb(today)
+
 
 // カレンダー作成
 function createProcess(year, month) {
@@ -95,6 +96,7 @@ function createProcess(year, month) {
     let row = Math.ceil((startDayOfWeek + endDate) / week.length);
 
     // dbから取得
+    const calendarFromdb = getCalendarFromdb(today);
     // const 
 
     // 1行ずつ設定

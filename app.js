@@ -20,17 +20,19 @@ app.get('/auth.ejs', (req, res) => {
 app.get('/main.ejs', (req, res) => {
     res.render('main.ejs');
 });
-app.get('/api/getCalender', async(req, res) => {
+app.get('/api/getCalendar', async(req, res) => {
     try{
-        console.log(req.query.month)
-        const getCalenders = await getShift(req.query.month);
+        // console.log(req.query.month)
+        const getCalendars = await getShift(req.query.month)
+        // console.log(getCalendars)
+        res.send(getCalendars)
     } catch (err){
         console.log(err)
     }
 });
-app.post('/api/addCalender', async(req, res) => {
+app.post('/api/addCalendar', async(req, res) => {
     try{
-        const addCalenders = await calender.create(req.body);
+        const addCalendars = await calendar.create(req.body);
     } catch (err){
         console.log(err)
     }
@@ -55,6 +57,7 @@ for (let i = 1; i <= endDate; i += 1){
     )
 }
 
+// ユーザー登録api
 let flg_reg = false;
 app.post('/reg', (req, res) => {
     let data = '';
@@ -73,6 +76,7 @@ app.post('/reg', (req, res) => {
     })
 });
 
+// ユーザー認証api
 let flg_auth = false;
 app.post('/auth', (req, res) => {
     let data = '';
@@ -147,20 +151,22 @@ function auth (param) {
 }
 
 // データ取得
-function getShift (param) {
+async function getShift (param) {
     const connection = mysql.createConnection({
         user: 'root',
         password: '',
     });
     connection.query('USE shift');
-    connection.query(
-        'SELECT * FROM ' +
-        param +
-        ';',
-        (err, result) => {
-            console.log(err)
-            // console.log(result)
+    const shift = await new Promise((resolve, reject) => {
+        connection.query(
+            'SELECT * FROM ' +
+            param +
+            ';',
+            (error, results) => {
+                return resolve(results);
+            }
+        );
     });
     connection.end();
-    return;
+    return shift;
 }
