@@ -17,9 +17,6 @@
 
 1. リポジトリのクローン
 
-git clone https://github.com/your-username/your-repository.git
-cd your-repository
-
 
 2. 必要なパッケージのインストール
 
