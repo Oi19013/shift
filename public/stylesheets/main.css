@@ -59,7 +59,7 @@ td.disabled {
 /*本日*/
 td.today {
     background-color: #d2f1ff;
-    color: #fff;
+    color: #666666;
 }
 
 /*ボタン*/

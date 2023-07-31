@@ -1,5 +1,6 @@
 const week = ["日", "月", "火", "水", "木", "金", "土"];
 const today = new Date();
+let user_name = ""
 // console.log(document.getElementsByClassName('modalClose'))
 const modal = document.getElementById('shiftModal');
 const buttonClose = document.getElementsByClassName('modalClose')[0];
@@ -9,6 +10,8 @@ let showDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
 // 初期表示
 window.onload = function () {
+    const url = window.location.href;
+    user_name = decodeURIComponent(url.split("user_name=")[1]);
     showProcess(today, calendar);
 };
 // 前の月表示
@@ -17,11 +20,13 @@ function prev(){
     showProcess(showDate);
 }
 
+
 // 次の月表示
 function next(){
     showDate.setMonth(showDate.getMonth() + 1);
     showProcess(showDate);
 }
+
 
 // カレンダー表示
 function showProcess(date) {
@@ -29,9 +34,15 @@ function showProcess(date) {
     let month = date.getMonth();
     document.querySelector('#header').innerHTML = year + "年 " + (month + 1) + "月";
 
-    let calendar = createProcess(year, month);
-    document.querySelector('#calendar').innerHTML = calendar;
+    createProcess(year, month)
+        .then((calendar) => {
+            document.querySelector('#calendar').innerHTML = calendar;
+        })
+        .catch((err) => {
+            console.log('エラーが発生しました', err);
+        });
 }
+
 
 // シフト編集画面表示
 function changeShift(count) {
@@ -40,11 +51,14 @@ function changeShift(count) {
     document.querySelector('#shiftDate').innerHTML = count_date;
 }
 
+
 // シフト編集画面非表示
 buttonClose.addEventListener('click', modalClose);
 function modalClose() {
   modal.style.display = 'none';
 }
+
+
 // モーダルコンテンツ以外がクリックされた時
 addEventListener('click', outsideClose);
 function outsideClose(e) {
@@ -65,15 +79,26 @@ function submit() {
 }
 
 // dbから取得
-const getCalendarFromdb = async (date) => {
+async function getCalendarFromdb(date) {
     try {
         let calendarFromdb = await axios.get('/api/getCalendar', {
             params: {
-                'month': `${date.getFullYear()}_${date.getMonth()}`
+                'month': `${date.getFullYear()}_${date.getMonth() + 1}`
             }
         });
-        console.log(calendarFromdb.data)
-        return calendarFromdb.data
+
+        let own_shift = {};
+        let shift_per_date = new Array(31);
+
+        for (const user_data of calendarFromdb.data) {
+            if (user_data["name"] === user_name) {
+                own_shift = user_data;
+            }
+            for (let i = 0; i < 31; i++) {
+                shift_per_date[i] = user_data[`${i+1}_`];
+            }
+        }
+        return [own_shift, shift_per_date];
     } catch (err) {
         console.log(err);
     }
@@ -81,7 +106,7 @@ const getCalendarFromdb = async (date) => {
 
 
 // カレンダー作成
-function createProcess(year, month) {
+async function createProcess(year, month) {
     // 曜日
     let calendar = "<table><tr class='dayOfWeek'>";
     for (let i = 0; i < week.length; i++) {
@@ -94,36 +119,45 @@ function createProcess(year, month) {
     let endDate = new Date(year, month + 1, 0).getDate();
     let lastMonthEndDate = new Date(year, month, 0).getDate();
     let row = Math.ceil((startDayOfWeek + endDate) / week.length);
+    let shift_time = "";
 
-    // dbから取得
-    const calendarFromdb = getCalendarFromdb(today);
-    // const 
+    try {
+        const [own_shift, shift_per_date] = await getCalendarFromdb(today);
+        console.log(own_shift);
+        console.log(shift_per_date);
 
-    // 1行ずつ設定
-    for (let i = 0; i < row; i++) {
-        calendar += "<tr>";
-        // 1colum単位で設定
-        for (let j = 0; j < week.length; j++) {
-            if (i == 0 && j < startDayOfWeek) {
-                // 1行目で1日まで先月の日付を設定
-                calendar += "<td class='disabled'>" + (lastMonthEndDate - startDayOfWeek + j + 1) + "</td>";
-            } else if (count >= endDate) {
-                // 最終行で最終日以降、翌月の日付を設定
-                count++;
-                calendar += "<td class='disabled'>" + (count - endDate) + "</td>";
-            } else {
-                // 当月の日付を曜日に照らし合わせて設定
-                count++;
-                if(year == today.getFullYear()
-                  && month == (today.getMonth())
-                  && count == today.getDate()){
-                    calendar += `<td class='today' id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count})'>` + count + "</button><p></p></td>";
+        // 1行ずつ設定
+        for (let i = 0; i < row; i++) {
+            calendar += "<tr>";
+            // 1colum単位で設定
+            for (let j = 0; j < week.length; j++) {
+                if (i == 0 && j < startDayOfWeek) {
+                    // 1行目で1日まで先月の日付を設定
+                    calendar += "<td class='disabled'>" + (lastMonthEndDate - startDayOfWeek + j + 1) + "</td>";
+                } else if (count >= endDate) {
+                    // 最終行で最終日以降、翌月の日付を設定
+                    count++;
+                    calendar += "<td class='disabled'>" + (count - endDate) + "</td>";
                 } else {
-                    calendar += `<td id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count})'>` + count + "</button><p></p></td>";
+                    // 当月の日付を曜日に照らし合わせて設定
+                    count++;
+                    if (own_shift[`${count}_`] !== null) {
+                        shift_time = `${own_shift[`${count}_`]}`;
+                    } else {
+                        shift_time = "";
+                    }
+                    if (year == today.getFullYear() && month == today.getMonth() && count == today.getDate()) {
+                        calendar += `<td class='today' id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count})'>` + count + `</button><p>${shift_time}</p></td>`;
+                    } else {
+                        calendar += `<td id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count})'>` + count + `</button><p>${shift_time}</p></td>`;
+                    }
                 }
             }
+            calendar += "</tr>";
         }
-        calendar += "</tr>";
+        return calendar;
+    } catch (err) {
+        console.log('エラーが発生しました', err);
+        throw err;
     }
-    return calendar;
 }

@@ -50,9 +50,9 @@ pool.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth()
 // 日毎のカラム作成
 for (let i = 1; i <= endDate; i += 1){
     pool.query(
-        `DESCRIBE ${today.getFullYear()}_${today.getMonth()+2} ${i}_;`,
+        `DESCRIBE ${today.getFullYear()}_${today.getMonth()+2} ${i}日;`,
         (error, results) => {
-            if (results.length == 0) pool.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+2} ADD ${i}_ varchar(5);`);
+            if (results.length == 0) pool.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+2} ADD ${i}日 varchar(5);`);
         }
     )
 }
@@ -83,10 +83,10 @@ app.post('/auth', (req, res) => {
     req.on('data', function(chunk) {
         data += chunk;
     }).on('end', function() {
-        auth(data.split('&'));
+        const user_name = auth(data.split('&'));
         setTimeout(function () {
             if (flg_auth) {
-                res.redirect('main.ejs');
+                res.redirect(`main.ejs?user_name=${user_name}`);
             } else {
                 res.redirect('auth.ejs?msg=IDまたはパスワードが正しくありません');
             }
@@ -147,7 +147,7 @@ function auth (param) {
     });
     connection.end();
     flg_auth = true;
-    return;
+    return name;
 }
 
 // データ取得
