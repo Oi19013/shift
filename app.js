@@ -2,7 +2,12 @@ const { render } = require('ejs');
 const express = require('express');
 const mysql = require('mysql');
 const app = express();
+const bodyParser = require('body-parser');
 const today = new Date();
+
+// body-parserミドルウェアを使用
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.use(express.static('public'))
 app.set('views',  'views')
@@ -22,7 +27,6 @@ app.get('/main.ejs', (req, res) => {
 });
 app.get('/api/getCalendar', async(req, res) => {
     try{
-        // console.log(req.query.month)
         const getCalendars = await getShift(req.query.month)
         // console.log(getCalendars)
         res.send(getCalendars)
@@ -32,7 +36,8 @@ app.get('/api/getCalendar', async(req, res) => {
 });
 app.post('/api/addCalendar', async(req, res) => {
     try{
-        const addCalendars = await calendar.create(req.body);
+        const params = req.body["params"]
+        await sendShift(params["month"], params["user_name"], params["date"], params["time"]);
     } catch (err){
         console.log(err)
     }
@@ -40,19 +45,19 @@ app.post('/api/addCalendar', async(req, res) => {
 app.listen(3000);
 
 // もしなければ次の月のtableを作成
-const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+const endDate = new Date(today.getFullYear(), today.getMonth() + 2, 0).getDate();
 const pool = mysql.createPool({
     user: 'root',
     password: '',
     database: 'shift',
 });
-pool.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth()+2} SELECT name from user;`);
+pool.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth() + 2} SELECT name from user;`);
 // 日毎のカラム作成
 for (let i = 1; i <= endDate; i += 1){
     pool.query(
-        `DESCRIBE ${today.getFullYear()}_${today.getMonth()+2} ${i}日;`,
+        `DESCRIBE ${today.getFullYear()}_${today.getMonth() + 2} ${i}日;`,
         (error, results) => {
-            if (results.length == 0) pool.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth()+2} ADD ${i}日 varchar(5);`);
+            if (results.length == 0) pool.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth() + 2} ADD ${i}日 varchar(5);`);
         }
     )
 }
@@ -60,44 +65,37 @@ for (let i = 1; i <= endDate; i += 1){
 // ユーザー登録api
 let flg_reg = false;
 app.post('/reg', (req, res) => {
-    let data = '';
-    req.on('data', function(chunk) {
-        data += chunk;
-    }).on('end', function() {
-        reg(data.split('&'));
-        setTimeout(function () {
-            if (flg_reg) {
-                res.redirect('/');
-            } else {
-                res.redirect('reg.ejs?msg=miss!');
-                console.log('miss')
-            }
-        }, 1000);
-    })
+    const data = req.body;
+    console.log(data)
+    reg(data);
+    setTimeout(function () {
+        if (flg_reg) {
+            res.redirect('/');
+        } else {
+            res.redirect('reg.ejs?msg=miss!');
+            console.log('miss')
+        }
+    }, 1000);
 });
 
 // ユーザー認証api
 let flg_auth = false;
 app.post('/auth', (req, res) => {
-    let data = '';
-    req.on('data', function(chunk) {
-        data += chunk;
-    }).on('end', function() {
-        const user_name = auth(data.split('&'));
-        setTimeout(function () {
-            if (flg_auth) {
-                res.redirect(`main.ejs?user_name=${user_name}`);
-            } else {
-                res.redirect('auth.ejs?msg=IDまたはパスワードが正しくありません');
-            }
-        }, 1000);
-    })
+    const data = req.body;
+    const user_name = auth(data);
+    setTimeout(function () {
+        if (flg_auth) {
+            res.redirect(`main.ejs?user_name=${user_name}`);
+        } else {
+            res.redirect('auth.ejs?msg=IDまたはパスワードが正しくありません');
+        }
+    }, 1000);
 });
 
 // ユーザー登録
 function reg (param) {
-    const name = param[0].split('=')[1];
-    const pass = param[1].split('=')[1];
+    const name = param["name"];
+    const pass = param["pass"];
 
     // const mysql = require('mysql');
     const connection = mysql.createConnection({
@@ -125,8 +123,8 @@ function reg (param) {
 
 // ユーザー認証
 function auth (param) {
-    const name = param[0].split('=')[1];
-    const pass = param[1].split('=')[1];
+    const name = param["name"];
+    const pass = param["pass"];
 
     const connection = mysql.createConnection({
         user: 'root',
@@ -150,8 +148,9 @@ function auth (param) {
     return name;
 }
 
+
 // データ取得
-async function getShift (param) {
+async function getShift (month) {
     const connection = mysql.createConnection({
         user: 'root',
         password: '',
@@ -160,7 +159,29 @@ async function getShift (param) {
     const shift = await new Promise((resolve, reject) => {
         connection.query(
             'SELECT * FROM ' +
-            param +
+            month +
+            ';',
+            (error, results) => {
+                return resolve(results);
+            }
+        );
+    });
+    connection.end();
+    return shift;
+}
+
+
+// データ送信
+async function sendShift (month, name, date, time) {
+    const connection = mysql.createConnection({
+        user: 'root',
+        password: '',
+    });
+    connection.query('USE shift');
+    const shift = await new Promise((resolve, reject) => {
+        connection.query(
+            "UPDATE `" + month +
+            `\` SET \`${date}\`='${time}' where \`name\`='${name}'` +
             ';',
             (error, results) => {
                 return resolve(results);

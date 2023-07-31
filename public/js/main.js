@@ -1,5 +1,6 @@
 const week = ["日", "月", "火", "水", "木", "金", "土"];
 const today = new Date();
+let pre_date = new Date();
 let user_name = ""
 // console.log(document.getElementsByClassName('modalClose'))
 const modal = document.getElementById('shiftModal');
@@ -32,6 +33,7 @@ function next(){
 function showProcess(date) {
     let year = date.getFullYear();
     let month = date.getMonth();
+    pre_date = date;
     document.querySelector('#header').innerHTML = year + "年 " + (month + 1) + "月";
 
     createProcess(year, month)
@@ -69,21 +71,22 @@ function outsideClose(e) {
 
 // シフト提出
 function submit() {
-    let count = document.querySelector('#shiftDate').innerHTML.replace('日', '')
-    let original = document.getElementById(count).innerHTML
-    let time = document.getElementById('shiftTime');
-    let index = time.selectedIndex;
-    let str = time.options[index].value;
-    document.getElementById(count).innerHTML = original.replace(/<p>(\d*:\d*~)*/, '<p>' + str);
-    modalClose()
+    let date = document.querySelector('#shiftDate').innerHTML
+    let selector = document.getElementById('shiftTime');
+    let index = selector.selectedIndex;
+    let time = selector.options[index].value.replace('~', '');
+    sendShift(date, time);
+    modalClose();
+    showProcess(pre_date);
 }
 
+
 // dbから取得
-async function getCalendarFromdb(date) {
+async function getCalendarFromdb(year, month) {
     try {
         let calendarFromdb = await axios.get('/api/getCalendar', {
             params: {
-                'month': `${date.getFullYear()}_${date.getMonth() + 1}`
+                'month': `${year}_${month + 1}`
             }
         });
 
@@ -95,10 +98,27 @@ async function getCalendarFromdb(date) {
                 own_shift = user_data;
             }
             for (let i = 0; i < 31; i++) {
-                shift_per_date[i] = user_data[`${i+1}_`];
+                shift_per_date[i] = user_data[`${i+1}日`];
             }
         }
         return [own_shift, shift_per_date];
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+
+// dbに登録
+async function sendShift(date, time) {
+    try {
+        await axios.post("/api/addCalendar", {
+            params: {
+                "month": `${pre_date.getFullYear()}_${pre_date.getMonth() + 1}`,
+                "user_name": user_name,
+                "date": date,
+                "time": time
+            }
+        });
     } catch (err) {
         console.log(err);
     }
@@ -113,7 +133,7 @@ async function createProcess(year, month) {
         calendar += "<th>" + week[i] + "</th>";
     }
     calendar += "</tr>";
-
+    console.log(month)
     let count = 0;
     let startDayOfWeek = new Date(year, month, 1).getDay();
     let endDate = new Date(year, month + 1, 0).getDate();
@@ -122,9 +142,7 @@ async function createProcess(year, month) {
     let shift_time = "";
 
     try {
-        const [own_shift, shift_per_date] = await getCalendarFromdb(today);
-        console.log(own_shift);
-        console.log(shift_per_date);
+        const [own_shift, shift_per_date] = await getCalendarFromdb(year, month);
 
         // 1行ずつ設定
         for (let i = 0; i < row; i++) {
@@ -141,11 +159,12 @@ async function createProcess(year, month) {
                 } else {
                     // 当月の日付を曜日に照らし合わせて設定
                     count++;
-                    if (own_shift[`${count}_`] !== null) {
-                        shift_time = `${own_shift[`${count}_`]}`;
+                    if (own_shift[`${count}日`] !== null && own_shift[`${count}日`] !== undefined) {
+                        shift_time = `${own_shift[`${count}日`]}`;
                     } else {
                         shift_time = "";
                     }
+                    console.log(shift_time)
                     if (year == today.getFullYear() && month == today.getMonth() && count == today.getDate()) {
                         calendar += `<td class='today' id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count})'>` + count + `</button><p>${shift_time}</p></td>`;
                     } else {

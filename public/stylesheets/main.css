@@ -156,3 +156,18 @@ td.today {
     width: 250pt;
     height: 45pt;
 }
+
+/* ヘッダーのスタイル */
+.site-header {
+background-color: #007bff; /* 背景色を適切な色に変更 */
+color: white; /* テキストの色を白に設定 */
+padding: 10px 20px; /* 上下左右の余白を設定 */
+display: flex; /* フレックスボックスを使用してコンテンツを中央揃え */
+align-items: center; /* 縦方向に中央揃え */
+}
+
+/* サイトタイトルのスタイル */
+.site-title {
+font-size: 24px; /* フォントサイズを適切な大きさに変更 */
+font-weight: bold; /* フォントの太さを太字に設定 */
+}
