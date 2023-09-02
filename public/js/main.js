@@ -47,10 +47,11 @@ function showProcess(date) {
 
 
 // シフト編集画面表示
-function changeShift(count) {
+function changeShift(count, shift) {
     modal.style.display = 'block';
     let count_date = count + "日"
     document.querySelector('#shiftDate').innerHTML = count_date;
+    // document.querySelector('#calendar').innerHTML = calendar;
 }
 
 
@@ -91,14 +92,25 @@ async function getCalendarFromdb(year, month) {
         });
 
         let own_shift = {};
-        let shift_per_date = new Array(31);
+        let shift_per_date = {};
+        for (let i = 0; i < 31; i++) {
+            shift_per_date[`${i}`] = [];
+        }
 
         for (const user_data of calendarFromdb.data) {
             if (user_data["name"] === user_name) {
                 own_shift = user_data;
             }
             for (let i = 0; i < 31; i++) {
-                shift_per_date[i] = user_data[`${i+1}日`];
+                if (user_data[`${i + 1}日`] == null) {
+                    time = 0;
+                } else {
+                    time = user_data[`${i + 1}日`];
+                }
+                shift_per_date[`${i}`].push({
+                    userName: user_data["name"],
+                    time: time
+                });
             }
         }
         return [own_shift, shift_per_date];
@@ -106,6 +118,7 @@ async function getCalendarFromdb(year, month) {
         console.log(err);
     }
 };
+
 
 
 // dbに登録
@@ -164,11 +177,10 @@ async function createProcess(year, month) {
                     } else {
                         shift_time = "";
                     }
-                    console.log(shift_time)
                     if (year == today.getFullYear() && month == today.getMonth() && count == today.getDate()) {
-                        calendar += `<td class='today' id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count})'>` + count + `</button><p>${shift_time}</p></td>`;
+                        calendar += `<td class='today' id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count}, ${JSON.stringify(shift_per_date[count])})'>` + count + `</button><p>${shift_time}</p></td>`;
                     } else {
-                        calendar += `<td id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count})'>` + count + `</button><p>${shift_time}</p></td>`;
+                        calendar += `<td id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count}, ${JSON.stringify(shift_per_date[count])})'>` + count + `</button><p>${shift_time}</p></td>`;
                     }
                 }
             }

@@ -51,13 +51,13 @@ const pool = mysql.createPool({
     password: '',
     database: 'shift',
 });
-pool.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth() + 2} SELECT name from user;`);
+pool.query(`CREATE table IF NOT EXISTS ${today.getFullYear()}_${today.getMonth() + 3} SELECT name from user;`);
 // 日毎のカラム作成
 for (let i = 1; i <= endDate; i += 1){
     pool.query(
-        `DESCRIBE ${today.getFullYear()}_${today.getMonth() + 2} ${i}日;`,
+        `DESCRIBE ${today.getFullYear()}_${today.getMonth() + 3} ${i}日;`,
         (error, results) => {
-            if (results.length == 0) pool.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth() + 2} ADD ${i}日 varchar(5);`);
+            if (results.length == 0) pool.query(`ALTER TABLE ${today.getFullYear()}_${today.getMonth() + 3} ADD ${i}日 varchar(5);`);
         }
     )
 }
