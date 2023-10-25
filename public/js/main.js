@@ -51,7 +51,7 @@ function changeShift(count, shift) {
 	document.querySelector("#shiftDate").innerHTML = count_date;
 	console.log(shift);
 	let shiftTable = document.getElementById("shiftTable");
-	shiftTable.innerHTML = "出勤予定者"; // 表をクリア
+	shiftTable.innerHTML = "出勤予定者"; // 表のタイトル
 
 	// 表のヘッダー行を作成
 	const thead = document.createElement("thead");
@@ -68,10 +68,12 @@ function changeShift(count, shift) {
 	shiftTable.appendChild(thead);
 
 	const tbody = document.createElement("tbody");
+	let shift_count = 0;
 
 	shift.forEach((person) => {
 		if (person["time"] !== 0) {
 			const tr = document.createElement("tr");
+			shift_count += 1;
 
 			// 名前と出勤時間のセルを作成
 			const nameCell = document.createElement("td");
@@ -86,6 +88,20 @@ function changeShift(count, shift) {
 		}
 	});
 
+	if (shift_count == 0) {
+		// const tr = document.createElement("tr");
+
+		// // 名前と出勤時間のセルを作成
+		// const nameCell = document.createElement("td");
+		// nameCell.textContent = "出勤予定者なし";
+		// tr.appendChild(nameCell);
+
+		// const timeCell = document.createElement("td");
+		// timeCell.textContent = "";
+		// tr.appendChild(timeCell);
+
+		shiftTable.innerHTML = "出勤予定者なし";
+	}
 	shiftTable.appendChild(tbody);
 }
 
@@ -111,6 +127,8 @@ function submit() {
 	let time = selector.options[index].value.replace("~", "");
 	sendShift(date, time);
 	modalClose();
+	// ページ更新
+	window.location.href = "/main.ejs?user_name=" + user_name;
 	showProcess(pre_date);
 }
 
@@ -226,7 +244,7 @@ async function createProcess(year, month) {
 					} else {
 						calendar +=
 							`<td id='${count}'><button id='shiftOpen' type='button' onclick='changeShift(${count}, ${JSON.stringify(
-								shift_per_date[count]
+								shift_per_date[count - 1]
 							)})'>` +
 							count +
 							`</button><p>${shift_time}</p></td>`;
