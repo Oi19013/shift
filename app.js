@@ -49,36 +49,8 @@ app.post("/api/addCalendar", async (req, res) => {
 });
 app.listen(3000);
 
-// もしなければ次の月のtableを作成
-const endDate = new Date(
-	today.getFullYear(),
-	today.getMonth() + 2,
-	0
-).getDate();
-const pool = mysql.createPool({
-	user: "root",
-	password: "",
-	database: "shift",
-});
-pool.query(
-	`CREATE table IF NOT EXISTS ${today.getFullYear()}_${
-		today.getMonth() + 3
-	} SELECT name from user;`
-);
-// 日毎のカラム作成
-for (let i = 1; i <= endDate; i += 1) {
-	pool.query(
-		`DESCRIBE ${today.getFullYear()}_${today.getMonth() + 3} ${i}日;`,
-		(error, results) => {
-			if (results.length == 0)
-				pool.query(
-					`ALTER TABLE ${today.getFullYear()}_${
-						today.getMonth() + 3
-					} ADD ${i}日 varchar(5);`
-				);
-		}
-	);
-}
+// 2ヶ月後の月のtableを作成
+createFutureTable(3);
 
 // ユーザー登録api
 let flg_reg = false;
@@ -207,4 +179,43 @@ async function sendShift(month, name, date, time) {
 	});
 	connection.end();
 	return shift;
+}
+
+// nヶ月後のtableを作成
+function createFutureTable(monthsAhead) {
+	const today = new Date();
+	let nextMonth = today.getMonth() + monthsAhead;
+	let nextYear = today.getFullYear();
+
+	if (nextMonth > 11) {
+		nextMonth -= 12;
+		nextYear++;
+	}
+
+	const endDate = new Date(nextYear, nextMonth + 1, 0).getDate();
+
+	const pool = mysql.createPool({
+		user: "root",
+		password: "",
+		database: "shift",
+	});
+
+	pool.query(
+		`CREATE TABLE IF NOT EXISTS ${nextYear}_${
+			nextMonth + 1
+		} SELECT name FROM user;`
+	);
+
+	for (let i = 1; i <= endDate; i += 1) {
+		pool.query(
+			`DESCRIBE ${nextYear}_${nextMonth + 1} ${i}日;`,
+			(error, results) => {
+				if (results.length === 0) {
+					pool.query(
+						`ALTER TABLE ${nextYear}_${nextMonth + 1} ADD ${i}日 varchar(5);`
+					);
+				}
+			}
+		);
+	}
 }

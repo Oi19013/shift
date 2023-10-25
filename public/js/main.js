@@ -49,7 +49,6 @@ function changeShift(count, shift) {
 	modal.style.display = "block";
 	let count_date = count + "日";
 	document.querySelector("#shiftDate").innerHTML = count_date;
-	console.log(shift);
 	let shiftTable = document.getElementById("shiftTable");
 	shiftTable.innerHTML = "出勤予定者"; // 表のタイトル
 
@@ -193,7 +192,6 @@ async function createProcess(year, month) {
 		calendar += "<th>" + week[i] + "</th>";
 	}
 	calendar += "</tr>";
-	console.log(month);
 	let count = 0;
 	let startDayOfWeek = new Date(year, month, 1).getDay();
 	let endDate = new Date(year, month + 1, 0).getDate();
