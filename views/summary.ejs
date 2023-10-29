@@ -8,8 +8,10 @@
   <link rel="stylesheet" href="stylesheets/main.css">
   <style>
     table {
-      width: 100%;
+      width: auto;
       border-collapse: collapse;
+      table-layout: fixed;
+      /* 追加: テーブルの幅を固定 */
     }
 
     th,
@@ -23,6 +25,14 @@
     td:first-child {
       min-width: 100px;
       /* 名前列の最小幅を設定 */
+      position: -webkit-sticky;
+      /* 追加: 最初の列を固定 */
+      position: sticky;
+      /* 追加: 最初の列を固定 */
+      left: 0;
+      /* 追加: 最初の列を左端に固定 */
+      background: #fff;
+      /* 追加: 背景を白色に */
     }
 
     th:not(:first-child),
@@ -41,39 +51,58 @@
   </header>
   <main>
     <h1 id="header"></h1>
-    <table id="summary-table">
-      <thead>
-        <tr>
-          <th>名前</th>
-          <!-- 日付をソートして列を生成 -->
-          <% const dates = Object.keys(data[0])
-            .filter(date => date !== "name")
-            .map(date => parseInt(date)) // 日付を整数に変換
-            .sort((a, b) => a - b); %>
-          <% dates.forEach(date => { %>
-          <th><%= date %></th>
+    <div style="overflow-x: auto;">
+      <table id="summary-table">
+        <thead>
+          <tr>
+            <th>名前</th>
+            <!-- 日付をソートして列を生成 -->
+            <% const dates = Object.keys(data[0])
+              .filter(date => date !== "name")
+              .map(date => parseInt(date)) // 日付を整数に変換
+              .sort((a, b) => a - b); %>
+            <% dates.forEach(date => { %>
+            <th><%= date %></th>
+            <% }); %>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.forEach(entry => { %>
+          <tr>
+            <td><%= entry.name %></td>
+            <!-- 日付をソートした順にデータを表示 -->
+            <% dates.forEach(date => { %>
+            <% const formattedDate = date + "日"; %>
+            <% const timeData = entry[formattedDate]; %>
+            <td><%= timeData ? timeData.replace(":00", "") : "" %></td>
+            <% }); %>
+          </tr>
           <% }); %>
-        </tr>
-      </thead>
-      <tbody>
-        <% data.forEach(entry => { %>
-        <tr>
-          <td><%= entry.name %></td>
-          <!-- 日付をソートした順にデータを表示 -->
-          <% dates.forEach(date => { %>
-          <% const formattedDate = date + "日"; %>
-          <% const timeData = entry[formattedDate]; %>
-          <td><%= timeData ? timeData.replace(":00", "") : "" %></td>
-          <% }); %>
-        </tr>
-        <% }); %>
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   </main>
   <footer>
     <!-- フッター内容を追加 -->
     <p></p>
   </footer>
 </body>
+<script>
+  // 現在のURLを取得
+  const currentURL = window.location.href;
+
+  // URLから日付情報を抽出
+  const dateParam = new URLSearchParams(new URL(currentURL).search).get("date");
+
+  // パラメータをフォーマット
+  if (dateParam) {
+    const [year, month] = dateParam.split('_');
+    const formattedDate = `${year}年${parseInt(month)}月シフト`;
+
+    // h1要素にフォーマット済みの日付情報を表示
+    const headerElement = document.getElementById("header");
+    headerElement.textContent = formattedDate;
+  }
+</script>
 
 </html>
