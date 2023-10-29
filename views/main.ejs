@@ -27,6 +27,11 @@
     <div class="wrapper">
       <!-- xxxx年xx月を表示 -->
       <h1 id="header"></h1>
+      
+      <!-- 一覧表示ボタン -->
+      <div id="shiftSummary">
+        <a href="javascript:shiftSummary()" id="shiftSummary">一覧表示</a>
+      </div>
     
       <!-- ボタンクリックで月移動 -->
       <div id="next-prev-button">
@@ -46,12 +51,13 @@
             <select id="shiftTime" class="form-select" aria-label="select example">
               <option selected>出勤時間</option>
               <option value="15:00~">15:00</option>
-              <option value="15:30~">15:30</option>
+              <!-- <option value="15:30~">15:30</option> -->
               <option value="16:00~">16:00</option>
-              <option value="16:30~">16:30</option>
+              <!-- <option value="16:30~">16:30</option> -->
               <option value="17:00~">17:00</option>
-              <option value="17:30~">17:30</option>
+              <!-- <option value="17:30~">17:30</option> -->
               <option value="18:00~">18:00</option>
+              <option value="18:00~">19:00</option>
             </select>
             <div class="mb-3">
               <br><label for="exampleFormControlTextarea1" class="form-label">備考</label></br>

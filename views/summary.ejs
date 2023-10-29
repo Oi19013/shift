@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>summary</title>
+  <link rel="stylesheet" href="stylesheets/main.css">
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-content">
+      <span class="site-title">昇家 三蔵</span>
+    </div>
+  </header>
+  <main>
+    <table id="summary-table">
+      <thead>
+        <tr>
+          <th>名前</th>
+          <!-- 日付をソートして列を生成 -->
+          <% const dates = Object.keys(data[0])
+            .filter(date => date !== "name")
+            .map(date => parseInt(date)) // 日付を整数に変換
+            .sort((a, b) => a - b); %>
+          <% dates.forEach(date => { %>
+            <th><%= date %></th>
+          <% }); %>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.forEach(entry => { %>
+          <tr>
+            <td><%= entry.name %></td>
+            <!-- 日付をソートした順にデータを表示 -->
+            <% dates.forEach(date => { %>
+              <% const formattedDate = date + "日"; %>
+              <td><%= entry[formattedDate] !== null ? entry[formattedDate] : "" %></td>
+            <% }); %>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <button id="download-button">ダウンロード</button>
+  </main>
+  <footer>
+    <!-- フッター内容を追加 -->
+    <p></p>
+  </footer>
+</body>
+<script>
+  // ダウンロードボタンのクリックイベント
+  document.getElementById("download-button").addEventListener("click", function() {
+    // テーブルをエクセルファイルとしてダウンロード
+    const table = document.getElementById("summary-table");
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+    XLSX.write(wb, { bookType: "xlsx", type: "blob" }, function(blob) {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "summary.xlsx";
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  });
+</script>
+</html>

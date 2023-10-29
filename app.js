@@ -50,13 +50,13 @@ app.post("/api/addCalendar", async (req, res) => {
 app.listen(3000);
 
 // 2ヶ月後の月のtableを作成
-createFutureTable(3);
+createFutureTable(2);
 
 // ユーザー登録api
 let flg_reg = false;
 app.post("/reg", (req, res) => {
 	const data = req.body;
-	console.log(data);
+	// console.log(data);
 	reg(data);
 	setTimeout(function () {
 		if (flg_reg) {
@@ -80,6 +80,37 @@ app.post("/auth", (req, res) => {
 			res.redirect("auth.ejs?msg=IDまたはパスワードが正しくありません");
 		}
 	}, 1000);
+});
+
+// 一覧ページapi
+app.get("/summary.ejs", (req, res) => {
+	const date = req.query["date"];
+	const connection = mysql.createConnection({
+		user: "root",
+		password: "",
+	});
+
+	connection.query("USE shift");
+
+	// 安全な方法でクエリを構築
+	const sql = "SELECT * FROM ??";
+	const values = [date];
+
+	connection.query(sql, values, function (err, result, fields) {
+		if (err) {
+			console.error(err);
+			// エラーハンドリングを行うか、エラーページにリダイレクトします。
+			return res.status(500).send("Internal Server Error");
+		}
+
+		// データを取得できた場合の処理
+		console.log(result);
+
+		// データをテンプレートに渡して表示
+		res.render("summary.ejs", { data: result });
+	});
+
+	connection.end();
 });
 
 // ユーザー登録

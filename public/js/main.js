@@ -257,3 +257,13 @@ async function createProcess(year, month) {
 		throw err;
 	}
 }
+
+function shiftSummary() {
+	// ページ情報から日時を取得
+	date = document.querySelector("#header").innerHTML;
+	date =
+		date.split("年")[0] +
+		"_" +
+		date.split("年")[1].split(" ")[1].split("月")[0];
+	window.location.href = "/summary.ejs?date=" + date;
+}
