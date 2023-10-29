@@ -1,25 +1,26 @@
 <h1>作成画面</h1>
 <form action="reg" method="post">
-    <div>ユーザー名<input type="text" name="name" style="size: 20px"></div>
-    <div>パスワード<input type="password" name="pass" style="size: 20px"></div>
-    <div>
-        <input type="button" value="戻る" onClick="cancel();">
-        <input type="submit" value="登録する">
-    </div>
+  <div>ユーザー名<input type="text" name="name" style="size: 20px"></div>
+  <div>パスワード<input type="password" name="pass" style="size: 20px"></div>
+  <div>
+    <input type="button" value="戻る" onClick="cancel();">
+    <input type="submit" value="登録する">
+  </div>
 </form>
 <div id="msg" style="color: red;"></div>
 
 <script>
-    window.onload = function() {
-        const url = window.location.href;
-        if (!url || !url.split("msg=")[1]) {
-            return;
-        }
-        let msg = document.getElementById("msg");
-        msg.innerHTML = decodeURIComponent(url.split("msg=")[1]);
-        return;
+  window.onload = function() {
+    const url = window.location.href;
+    if (!url || !url.split("msg=")[1]) {
+      return;
     }
-    function cancel() {
-        location.href = '/';
-    }
+    let msg = document.getElementById("msg");
+    msg.innerHTML = decodeURIComponent(url.split("msg=")[1]);
+    return;
+  }
+
+  function cancel() {
+    location.href = '/';
+  }
 </script>

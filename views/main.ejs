@@ -1,44 +1,48 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>カレンダー</title>
   <link rel="stylesheet" href="stylesheets/main.css">
 </head>
+
 <body>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>サイトのヘッダー</title>
-  <link rel="stylesheet" href="">
-</head>
-<body>
-  <header class="site-header">
-    <div class="header-content">
-      <span class="site-title">昇家 三蔵</span>
-    </div>
-  </header>
-  <!-- ここに他のコンテンツを追加 -->
-</body>
-  
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サイトのヘッダー</title>
+    <link rel="stylesheet" href="">
+  </head>
+
+  <body>
+    <header class="site-header">
+      <div class="header-content">
+        <span class="site-title">昇家 三蔵</span>
+      </div>
+    </header>
+    <!-- ここに他のコンテンツを追加 -->
+  </body>
+
 
   <main>
     <div class="wrapper">
       <!-- xxxx年xx月を表示 -->
       <h1 id="header"></h1>
-      
+
       <!-- 一覧表示ボタン -->
       <div id="shiftSummary">
         <a href="javascript:shiftSummary()" id="shiftSummary">一覧表示</a>
       </div>
-    
+
       <!-- ボタンクリックで月移動 -->
       <div id="next-prev-button">
-          <button id="prev" onclick="prev()">‹</button>
-          <button id="next" onclick="next()">›</button>
+        <button id="prev" onclick="prev()">‹</button>
+        <button id="next" onclick="next()">›</button>
       </div>
-    
+
       <!-- カレンダー -->
       <div id="calendar"></div>
       <div id="shiftModal" class="modal">
@@ -80,4 +84,5 @@
     <p></p>
   </footer>
 </body>
+
 </html>

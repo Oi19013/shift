@@ -104,10 +104,10 @@ app.get("/summary.ejs", (req, res) => {
 		}
 
 		// データを取得できた場合の処理
-		console.log(result);
+		// console.log(result);
 
 		// データをテンプレートに渡して表示
-		res.render("summary.ejs", { data: result });
+		res.render("summary.ejs", { data: result, date: date });
 	});
 
 	connection.end();

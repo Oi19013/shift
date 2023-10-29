@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,13 +11,28 @@
       width: 100%;
       border-collapse: collapse;
     }
-    th, td {
+
+    th,
+    td {
       border: 1px solid #000;
       padding: 8px;
       text-align: center;
     }
+
+    th:first-child,
+    td:first-child {
+      min-width: 100px;
+      /* 名前列の最小幅を設定 */
+    }
+
+    th:not(:first-child),
+    td:not(:first-child) {
+      width: 50px;
+      /* 日付列の幅を設定 */
+    }
   </style>
 </head>
+
 <body>
   <header class="site-header">
     <div class="header-content">
@@ -24,6 +40,7 @@
     </div>
   </header>
   <main>
+    <h1 id="header"></h1>
     <table id="summary-table">
       <thead>
         <tr>
@@ -34,44 +51,29 @@
             .map(date => parseInt(date)) // 日付を整数に変換
             .sort((a, b) => a - b); %>
           <% dates.forEach(date => { %>
-            <th><%= date %></th>
+          <th><%= date %></th>
           <% }); %>
         </tr>
       </thead>
       <tbody>
         <% data.forEach(entry => { %>
-          <tr>
-            <td><%= entry.name %></td>
-            <!-- 日付をソートした順にデータを表示 -->
-            <% dates.forEach(date => { %>
-              <% const formattedDate = date + "日"; %>
-              <td><%= entry[formattedDate] !== null ? entry[formattedDate] : "" %></td>
-            <% }); %>
-          </tr>
+        <tr>
+          <td><%= entry.name %></td>
+          <!-- 日付をソートした順にデータを表示 -->
+          <% dates.forEach(date => { %>
+          <% const formattedDate = date + "日"; %>
+          <% const timeData = entry[formattedDate]; %>
+          <td><%= timeData ? timeData.replace(":00", "") : "" %></td>
+          <% }); %>
+        </tr>
         <% }); %>
       </tbody>
     </table>
-    <button id="download-button">ダウンロード</button>
   </main>
   <footer>
     <!-- フッター内容を追加 -->
     <p></p>
   </footer>
 </body>
-<script>
-  // ダウンロードボタンのクリックイベント
-  document.getElementById("download-button").addEventListener("click", function() {
-    // テーブルをエクセルファイルとしてダウンロード
-    const table = document.getElementById("summary-table");
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-    XLSX.write(wb, { bookType: "xlsx", type: "blob" }, function(blob) {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "summary.xlsx";
-      a.click();
-      window.URL.revokeObjectURL(url);
-    });
-  });
-</script>
+
 </html>
