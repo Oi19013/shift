@@ -13,7 +13,16 @@ let showDate = new Date(today.getFullYear(), today.getMonth(), 1);
 window.onload = function () {
 	const url = window.location.href;
 	user_name = decodeURIComponent(url.split("user_name=")[1]);
-	showProcess(today, calendar);
+	month = decodeURIComponent(url.split("user_name=")[0].split("show_date=")[1]);
+	console.log(month);
+	if (typeof user_name == "undefined") {
+		alert("ログインしてください。");
+	} else if (month == "undefined") {
+		showProcess(today, calendar);
+	} else {
+		showDate.setMonth(Number(month) - 1);
+		showProcess(showDate);
+	}
 };
 // 前の月表示
 function prev() {
@@ -120,15 +129,19 @@ function outsideClose(e) {
 
 // シフト提出
 function submit() {
+	let yearMonth = document.querySelector("#header").innerHTML;
+	let year = yearMonth.split("年")[0];
+	let month = yearMonth.split("年")[1].split("月")[0];
+	yearMonth = year + "_" + month;
 	let date = document.querySelector("#shiftDate").innerHTML;
 	let selector = document.getElementById("shiftTime");
 	let index = selector.selectedIndex;
 	let time = selector.options[index].value.replace("~", "");
-	sendShift(date, time);
+	sendShift(yearMonth, date, time);
 	modalClose();
 	// ページ更新
-	window.location.href = "/main.ejs?user_name=" + user_name;
-	showProcess(pre_date);
+	window.location.href = `/main.ejs?show_date=${month}user_name=${user_name}`;
+	// showProcess(pre_date);
 }
 
 // dbから取得
@@ -169,19 +182,55 @@ async function getCalendarFromdb(year, month) {
 }
 
 // dbに登録
-async function sendShift(date, time) {
+async function sendShift(yearMonth, date, time) {
+	console.log(date);
 	try {
-		await axios.post("/api/addCalendar", {
-			params: {
-				month: `${pre_date.getFullYear()}_${pre_date.getMonth() + 1}`,
-				user_name: user_name,
-				date: date,
-				time: time,
-			},
-		});
+		// ここで編集可能かどうかの条件をチェック
+		if (isEditableDate(yearMonth, date)) {
+			await axios.post("/api/addCalendar", {
+				params: {
+					month: `${pre_date.getFullYear()}_${pre_date.getMonth() + 1}`,
+					user_name: user_name,
+					date: date,
+					time: time,
+				},
+			});
+		} else {
+			// 編集不可の場合、アラートを表示
+			alert("この日付は編集できません。");
+		}
 	} catch (err) {
 		console.log(err);
 	}
+}
+
+// 編集可能な日付かどうかをチェックする関数
+function isEditableDate(yearMonth, date) {
+	const currentDate = new Date();
+	const currentYear = currentDate.getFullYear();
+	const currentMonth = currentDate.getMonth() + 1;
+	const currentDay = currentDate.getDate();
+
+	// 引数から渡された年月日を取得
+	const [year, month] = yearMonth.split("_");
+	date = date.replace("日", "");
+
+	if (date >= 1 && date <= 15) {
+		// 1日から15日の場合
+		const limitDate = new Date(year, month - 2, 25); // 前月の25日
+		if (currentDate <= limitDate) {
+			return true;
+		}
+	} else {
+		// 16日から月末の場合
+		const limitDate = new Date(year, month - 1, 10); // その月の10日
+		if (currentDate <= limitDate) {
+			return true;
+		}
+	}
+
+	// それ以外の場合は編集不可
+	return false;
 }
 
 // カレンダー作成
